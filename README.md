@@ -6,7 +6,7 @@ En este curso cubrimos los aspectos basicos de R para el analisis de datos.
 
 | **Semana** 	|     **Fecha**    	|                                                        **Tema**                                                       	| **Link**  **Grabacion** 	| **Material**  **Suplementario** 	|
 |:----------:	|:----------------:	|:---------------------------------------------------------------------------------------------------------------------:	|:-----------------------:	|:-------------------------------:	|
-|          1 	|  Viernes, Feb 25 	| - Como importamos y leemos datos - Que son los R dataframes                                                           	|                         	|                                 	|
+|          1 	|  Viernes, Feb 25 	| - Como importamos y leemos datos - Que son los R dataframes  - Markdown                                                         	|                         	|                                 	|
 |          2 	|   Viernes, Mar 4 	| - Manipulacion y transformacion de datos con `dplyr`: Parte 1                                                         	|                         	|                                 	|
 |          3 	|  Viernes, Mar 11 	| - Manipulacion y transformacion de datos con `dplyr`: Parte 2                                                         	|                         	|                                 	|
 |          4 	|  Viernes, Mar 18 	| - Datos Tidy - Como manipular datos categoricos usando factores - Como utilizar JOINs                                 	|                         	|                                 	|
