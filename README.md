@@ -4,8 +4,8 @@ En este curso cubrimos los aspectos basicos de R para el analisis de datos.
 
 ## Cronograma
 
-| **Semana** 	|     **Fecha**    	|                                                        **Tema**                                                       	| **Link**  **Grabacion** 	| **Material**  **Suplementario** 	|
-|:----------:	|:----------------:	|:---------------------------------------------------------------------------------------------------------------------:	|:-----------------------:	|:-------------------------------:	|
+| **Semana** 	|     **Fecha**    	|                                                        **Tema**                                                       	| 
+|:----------:	|:----------------:	|:---------------------------------------------------------------------------------------------------------------------:	|
 |          1 	|  Viernes, Feb 25 	| - Como importamos y leemos datos - Que son los R dataframes  - Markdown                                                         	|                         	|                                 	|
 |          2 	|   Viernes, Mar 4 	| - Manipulacion y transformacion de datos con `dplyr`: Parte 1                                                         	|                         	|                                 	|
 |          3 	|  Viernes, Mar 11 	| - Manipulacion y transformacion de datos con `dplyr`: Parte 2                                                         	|                         	|                                 	|
