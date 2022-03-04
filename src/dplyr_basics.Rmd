@@ -1,0 +1,122 @@
+---
+title: 'Manipulacion y transformacion de datos con dplyr: Parte 1'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+En esta oportunidad nos vamos a enfocar en como usar RStudio y como usar `dplyr`
+
+## Carga de librerias
+
+Primero instalamos y cargamos las librerias que requerimos. 
+```{r}
+install.packages("tidyverse")
+install.packages("gapminder")
+library(tidyverse)
+library(gapminder)
+```
+
+Ahora visualizemos el conjunto de datos con el que vamos a trabajar
+
+```{r}
+gapminder
+```
+
+## Seleccionando un subconjunto de los datos
+
+```{r}
+canada <- gapminder[241:252, ]
+canada
+```
+
+### La función `filter`
+
+La funcion filter nos ayuda a filtrar por filas un Dataframe.
+
+Filtremos por expectativa de vida
+
+```{r}
+filter(gapminder, lifeExp < 29)
+```
+
+Filtremos por pais y por año
+
+```{r}
+filter(gapminder, country == "Argentina", year > 1979)
+```
+
+Filtermos dos paises a la vez usando un "truco"
+
+```{r}
+filter(gapminder, country %in% c("Colombia", "Peru", "Ecuador"))
+```
+
+Este operador `%in%` es usado para identificar elementos que pertenecen a un vector o un Dataframe
+
+Nuestros ejemplos anteriores muestran que hacer esto `canada <- gapminder[241:252, ]` es en general una mala idea ya que no hace de forma explícita las decisiones que se toman para hacer el subconjunto. Es mucho mejor hacer esto
+
+```{r}
+filter(gapminder, country == "Canada")
+```
+
+### Operador Pipe `%>%`
+
+Se importa desde el paquete [magrittr](https://magrittr.tidyverse.org/)
+
+```{r}
+gapminder %>% head()
+```
+
+Lo anterior es equivalente a escribir `head(gapminder)`. El operador pipe toma lo que esta en la izquierda y lo usa en lo que esta definido en derecha. Lo usa como el primer **argumento**.
+
+Ahora bien, ¿Cómo especificamos un argumento dentro de la funcion?
+
+```{r}
+gapminder %>% head(3)
+```
+
+### Funcion `select()`
+
+Con esta función podemos crear un subconjunto del Dtaframe por columnas o variables
+
+```{r}
+select(gapminder, year, lifeExp)
+```
+
+```{r}
+gapminder %>%
+  select(year, lifeExp) %>%
+  head(4)
+```
+
+
+```{r}
+gapminder %>%
+  filter(country == "Chile") %>%
+  select(year, lifeExp)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
