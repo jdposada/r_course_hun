@@ -1,0 +1,82 @@
+---
+title: 'Tidy Data en R'
+output:
+  html_document: default
+  pdf_document: default
+---
+
+Cargamos las librerias
+
+```{r}
+library(tidyverse)
+```
+
+
+## Tidy Data
+
+- Observacion
+- Variable 
+- Valores
+
+```{r}
+classroom <- read.csv(file="classroom.csv")
+
+classroom
+```
+
+## [pivot_longer](https://tidyr.tidyverse.org/reference/pivot_longer.html)
+
+
+```{r}
+classroom %>% 
+  pivot_longer(quiz1:test1, 
+               names_to = "assessment", 
+               values_to = "grade") 
+```
+
+## Problemas Tipicos a Solucionar con Tidy Data
+
+- Encabezados de las columnas son valores no nombres de variables
+- Multiples variables en una sola columna
+- Variables estan tanto como en filas como en columnas
+- Hay multiples "primary keys" por tabla. Hay multiples unidades de observacion
+en cada tabla
+- Tener muchas tablas en dode la informacion acerca de la unidad de observacion 
+esten distribuidas
+
+
+```{r}
+head(billboard)
+```
+
+```{r}
+billboard2 <- billboard %>%
+                pivot_longer(
+                  wk1:wk76,
+                  names_to = "week",
+                  values_to = "rank",
+                  values_drop_na = TRUE)
+```
+
+
+```{r}
+head(billboard2)
+```
+
+### Trabajo en casa
+
+Como podriamos cambiar `wk1, wk2, etc...` por numeros `1, 2, 3, etc...`
+
+
+
+
+
+
+
+
+
+
+
+
+
+

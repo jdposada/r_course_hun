@@ -1,0 +1,204 @@
+---
+title: 'Trabajando con JOIN en R'
+output:
+  html_document: default
+  pdf_document: default
+---
+
+Cargamos las librerias
+
+```{r}
+library(tidyverse)
+library(gapminder)
+```
+
+
+## Usando JOINs
+
+```{r}
+canada_gdp <- gapminder %>% 
+  filter(country == "Canada") %>%
+  select(year, gdpPercap) %>%
+  rename(gdpPercapCan = gdpPercap) %>%
+  arrange(desc(gdpPercapCan))
+  
+```
+
+```{r}
+canada_gdp
+```
+
+```{r}
+head(gapminder)
+```
+```{r}
+dim(gapminder)
+```
+
+
+## [Inner join](https://dplyr.tidyverse.org/reference/mutate-joins.html#ref-usage) 
+
+Comparar El GDP de Canada con el GDP del resto de los paises
+
+```{r}
+my_gdp <- inner_join(x = gapminder,
+                     y = canada_gdp, 
+                     by = "year")
+```
+
+```{r}
+head(my_gdp)
+```
+```{r}
+my_gdp %>% 
+  select(country, year, gdpPercap, gdpPercapCan) %>%
+  filter(country %in% c("Colombia", "Peru"))
+```
+
+## Nuevos datos
+
+```{r}
+superheroes <- tibble::tribble(
+       ~name, ~alignment,  ~gender,          ~publisher,
+   "Magneto",      "bad",   "male",            "Marvel",
+     "Storm",     "good", "female",            "Marvel",
+  "Mystique",      "bad", "female",            "Marvel",
+    "Batman",     "good",   "male",                "DC",
+     "Joker",      "bad",   "male",                "DC",
+  "Catwoman",      "bad", "female",                "DC",
+   "Hellboy",     "good",   "male", "Dark Horse Comics"
+  )
+
+
+publishers <- tibble::tribble(
+  ~publisher, ~yr_founded,
+        "DC",       1934L,
+    "Marvel",       1939L,
+     "Image",       1992L
+  )
+```
+
+```{r}
+superheroes
+```
+
+```{r}
+publishers
+```
+
+```{r}
+df_inner_join <- inner_join(x = superheroes,
+                            y = publishers,
+                            by = "publisher")
+
+df_inner_join
+```
+
+Vemos claramente como Dark Horse Commics no aparece en el dataframe final al ser
+este fruto del inner_join
+
+## [semi_join](https://dplyr.tidyverse.org/reference/filter-joins.html#ref-usage)
+
+```{r}
+df_semi_join <- semi_join(x = superheroes,
+                          y = publishers,
+                          by = "publisher")
+
+df_semi_join
+```
+
+El semi_join solamente conserva las columnas de x. El semi join no duplica las
+filas de la tabla x
+
+
+## [left_join](https://dplyr.tidyverse.org/reference/mutate-joins.html#ref-usage)
+
+
+```{r}
+df_left_join <- left_join(x = superheroes,
+                          y = publishers,
+                          by = "publisher")
+
+df_left_join
+```
+
+
+Preserva toda las filas de x agregando las columnas de y. 
+
+## [anti_join](https://dplyr.tidyverse.org/reference/filter-joins.html#ref-usage)
+
+```{r}
+df_anti_join <- anti_join(x = superheroes,
+                          y = publishers,
+                          by = "publisher")
+
+df_anti_join
+```
+
+Retorna las filas de x que no tienen un match en y. Regresa solo las columnas de x
+
+## Inner Join
+
+Ahora usamos a publisher como x o la tabla de la derecha
+
+```{r}
+df_inner_join <- inner_join(x = publishers,
+                            y = superheroes,
+                            by = "publisher")
+
+df_inner_join
+```
+
+Demonos cuenta que hay duplicacion dado que por cada match se copian las 
+filas de la tabla izquierda o y
+
+
+## Semi Join
+
+```{r}
+df_semi_join <- semi_join(x = publishers,
+                          y = superheroes,
+                          by = "publisher")
+
+df_semi_join
+```
+
+Solo prevalece la informacion x sin duplicar.
+
+
+## Left Join
+
+```{r}
+df_left_join <- left_join(x = publishers,
+                          y = superheroes,
+                          by = "publisher")
+
+df_left_join
+```
+
+
+Por cada match traigo toda la informacion de la table y preservando todas 
+las filas de la tabla x
+
+```{r}
+df_anti_join <- anti_join(x = publishers,
+                          y = superheroes,
+                          by = "publisher")
+
+df_anti_join
+```
+
+## [full_join](https://dplyr.tidyverse.org/reference/mutate-joins.html#ref-usage)
+
+```{r}
+df_full_join <- full_join(x = publishers,
+                          y = superheroes,
+                          by = "publisher")
+
+df_full_join
+```
+
+
+
+
+
