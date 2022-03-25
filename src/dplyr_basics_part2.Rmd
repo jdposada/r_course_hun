@@ -1,0 +1,376 @@
+---
+title: 'Manipulacion y transformacion de datos con dplyr: Parte 1'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+En esta oportunidad nos vamos a enfocar en como usar RStudio y como usar `dplyr`
+
+## Carga de librerias
+
+Primero instalamos y cargamos las librerias que requerimos.
+
+```{r}
+install.packages("tidyverse")
+```
+
+```{r}
+install.packages("gapminder")
+```
+
+```{r}
+library(tidyverse)
+library(gapminder)
+```
+
+Ahora visualizemos el conjunto de datos con el que vamos a trabajar
+
+```{r}
+gapminder
+```
+
+## Seleccionando un subconjunto de los datos
+
+```{r}
+gapminder[1:10, 3]
+```
+
+```{r}
+canada <- gapminder[1, 3]
+canada
+```
+
+### La función `filter`
+
+La funcion filter nos ayuda a filtrar por filas un Dataframe.
+
+Filtremos por expectativa de vida
+
+```{r}
+filter(gapminder, lifeExp < 29)
+```
+
+Filtremos por pais y por año
+
+```{r}
+filter(gapminder, country == "Argentina", year > 1979)
+```
+
+Filtermos dos paises a la vez usando un "truco"
+
+```{r}
+filter(gapminder, country %in% c("Colombia", "Peru", "Ecuador"))
+```
+
+Este operador `%in%` es usado para identificar elementos que pertenecen a un vector o un Dataframe
+
+Nuestros ejemplos anteriores muestran que hacer esto `canada <- gapminder[241:252, ]` es en general una mala idea ya que no hace de forma explícita las decisiones que se toman para hacer el subconjunto. Es mucho mejor hacer esto
+
+```{r}
+filter(gapminder, country == "Canada")
+```
+
+### Operador Pipe `%>%`
+
+Se importa desde el paquete [magrittr](https://magrittr.tidyverse.org/)
+
+```{r}
+head(gapminder)
+```
+
+```{r}
+gapminder %>% head()
+```
+
+Lo anterior es equivalente a escribir `head(gapminder)`. El operador pipe toma lo que esta en la izquierda y lo usa en lo que esta definido en derecha. Lo usa como el primer **argumento**.
+
+Ahora bien, ¿Cómo especificamos un argumento dentro de la funcion?
+
+```{r}
+head(gapminder, 3)
+```
+
+```{r}
+gapminder %>% head(3)
+```
+
+### Funcion [select()](https://dplyr.tidyverse.org/reference/select.html)
+
+Con esta función podemos crear un subconjunto del Dtaframe por columnas o variables
+
+```{r}
+select(gapminder, year, lifeExp)
+```
+
+```{r}
+gapminder %>%
+  select(year, lifeExp) 
+```
+
+Usando el operador pipe con mas de una funcion en cadena
+
+```{r}
+gapminder %>%
+  select(year, lifeExp) %>%
+  head(4)
+```
+
+```{r}
+head(select(gapminder, year, lifeExp), 4)
+```
+
+Ejercicio en clase: 1. Seleccionar solamente las filas que correponde a Chile 2. Seleccionar solamente dos columnas `year`, `lifeExp`
+
+```{r}
+gapminder %>%
+  filter(country == "Chile") %>%
+  select(year, lifeExp)
+```
+
+### Funcion [mutate()](https://dplyr.tidyverse.org/reference/mutate.html)
+
+```{r}
+gapminder %>%
+  mutate(gdp = pop * gdpPercap)
+```
+
+Funcion basica para repetir un valor
+
+```{r}
+rep(4, 7)
+```
+
+```{r}
+ctib <- gapminder %>%
+  filter(country == "Canada")
+
+ctib
+
+```
+
+```{r}
+ctib$gdpPercap
+
+```
+
+```{r}
+dim(ctib)
+```
+
+```{r}
+nlevels(gapminder$country)
+```
+
+```{r}
+dim(gapminder)
+```
+
+```{r}
+12 * 142
+```
+
+```{r}
+rep(ctib$gdpPercap, nlevels(gapminder$country))
+```
+
+```{r}
+gapminder %>%
+  mutate(gdpCanada = rep(ctib$gdpPercap, nlevels(country)))
+```
+
+```{r}
+
+my_gap <- gapminder %>%
+  mutate(gdpCanada = rep(ctib$gdpPercap, nlevels(country)),
+         gdpPercapRel = gdpPercap / gdpCanada,
+         gdpCanada = NULL)
+
+my_gap
+```
+
+```{r}
+779.4453 / 11367.16
+```
+
+### Funcion [arrange()](https://dplyr.tidyverse.org/reference/arrange.html)
+
+```{r}
+my_gap %>%
+  arrange(year, country)
+```
+
+Ahora cosas como estas son posible
+
+```{r}
+my_gap %>%
+  filter(year == 2007) %>%
+  arrange(lifeExp)
+```
+
+Que esta pasando alli?
+
+```{r}
+my_gap %>%
+  filter(year == 2007) %>%
+  arrange(desc(lifeExp))
+```
+
+### Funcion [rename()](https://dplyr.tidyverse.org/reference/rename.html)
+
+```{r}
+my_gap %>%
+  rename(life_exp = lifeExp,
+         gdp_percap = gdpPercap,
+         gdp_percap_rel = gdpPercapRel)
+```
+
+Y ahora una de las funciones mas potentes
+
+### Funcions
+
+#### [group_by()](https://dplyr.tidyverse.org/reference/group_by.html)
+
+#### [summarize()](https://dplyr.tidyverse.org/reference/summarise.html)
+
+```{r}
+my_gap %>%
+  group_by(continent) %>%
+  summarize(n = n())
+```
+
+```{r}
+my_gap %>%
+  group_by(continent) %>%
+  tally()
+```
+```{r}
+my_gap %>%
+  group_by(continent) %>%
+  summarize(avg_lifeExp = mean(lifeExp))
+```
+Lista de funciones disponibles
+
+- mean()
+- median()
+- var()
+- sd()
+- mad()
+- IQR()
+- min()
+- max()
+
+
+```{r}
+my_gap %>%
+  group_by(continent) %>%
+  summarize(min_life_span = min(lifeExp),
+            max_life_span = max(lifeExp))
+```
+`summarize_at()`
+
+
+```{r}
+gapminder %>%
+  filter(year %in% c(1952, 2007)) %>%
+  group_by(continent, year) %>%
+  summarize_at(vars(lifeExp, gdpPercap), list(~mean(.), ~median(.)))
+```
+
+`first()`
+
+```{r}
+gapminder %>% 
+  group_by(country) %>% 
+  select(country, year, lifeExp) %>% 
+  mutate(lifeExp_gain = lifeExp - first(lifeExp))
+```
+
+```{r}
+gapminder %>% 
+  group_by(country) %>% 
+  select(country, year, lifeExp) %>% 
+  mutate(lifeExp_gain = lifeExp - first(lifeExp)) %>% 
+  filter(year < 1963)
+```
+
+Graficar el crecimiento de la expectativa de vida para Colombia
+
+```{r}
+colombia_df <- gapminder %>% 
+  group_by(country) %>% 
+  select(country, year, lifeExp) %>% 
+  mutate(lifeExp_gain = lifeExp - first(lifeExp)) %>% 
+  filter(country == "Colombia")
+```
+
+
+```{r}
+colombia_df
+```
+```{r}
+plot(lifeExp_gain ~ year, colombia_df)
+```
+## Funciones con ventanas
+
+Son funciones que esperan *n* elementos en la entrada y producen *n* elementos en la salida.
+
+`rank()` es una de estas funciones
+
+```{r}
+gapminder %>%
+  filter(continent == "Asia") %>%
+  select(year, country, lifeExp) %>%
+  group_by(year) 
+```
+```{r}
+gapminder %>%
+  filter(continent == "Asia") %>%
+  select(year, country, lifeExp) %>%
+  group_by(year) %>%
+  filter(min_rank(lifeExp) < 2)
+```
+
+```{r}
+gapminder %>%
+  filter(continent == "Asia") %>%
+  select(year, country, lifeExp) %>%
+  group_by(year) %>%
+  filter(min_rank(desc(lifeExp)) < 2)
+```
+
+```{r}
+gapminder %>%
+  filter(continent == "Asia") %>%
+  select(year, country, lifeExp) %>%
+  group_by(year) %>%
+  filter(min_rank(desc(lifeExp)) < 2 | min_rank(lifeExp) < 2) %>% 
+  arrange(year) 
+```
+
+## Usando JOINs
+
+```{r}
+canada_gdp <- gapminder %>% 
+  filter(country == "Canada") %>%
+  select(year, gdpPercap) %>%
+  rename(gdpPercapCan = gdpPercap) %>%
+  arrange(desc(gdpPercapCan))
+  
+```
+
+```{r}
+canada_gdp
+```
+
+```{r}
+my_gdp <- inner_join(x = gapminder,
+                     y = canada_gdp, 
+                     by = "year")
+```
+
+```{r}
+my_gdp
+```
+
+
