@@ -1,0 +1,217 @@
+---
+title: 'Modelos Lineales en R'
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# Datos de Casas en Ames, Iowa US
+
+Estos datos contienen 2930 casas en la ciudad de Iowa en Estados Unidos. Los datos originales han sido modificados para facilitar uso y hacen parte del paquete [modeldata](https://modeldata.tidymodels.org/). *modeldata* hace parte de tidyverse
+
+Usaremos tambien un nuevo paquete [mapview](https://r-spatial.github.io/mapview/index.html). Este paquete nos servira para visualizar datos Geospaciales muy facilmente.
+
+Los siguientes comandos son necesarios en linux como prerequisito para instalar el paquete mapview
+
+```
+sudo apt-get install libudunits2-dev
+sudo apt-add-repository ppa:ubuntugis/ubuntugis-unstable
+sudo apt-get update
+sudo apt-get install libgdal-dev libgeos-dev libproj-dev
+```
+
+
+**Importemos las librerias necesarias**
+
+```{r}
+library(tidymodels)
+library(mapview)
+```
+
+**Resolvamos los conflictos entre los distintos paquetes**
+
+```{r}
+tidymodels_prefer(quiet=FALSE)
+```
+
+
+**Carguemos los datos**
+
+```{r}
+data(ames)
+
+head(ames)
+```
+Revisemos las dimensiones del dataframe
+
+```{r}
+dim(ames)
+```
+
+Revisemos la lista de variables
+
+```{r}
+names(ames)
+```
+
+
+## Pregunta Problema
+
+Que queremos modelar? 
+
+Queremos estimar el precio de venta de las casas usando las otras variables como entradas del modelo
+
+
+**Revisemos el histograma de la variable que queremos estimar**
+
+```{r}
+hist(ames$Sale_Price, breaks = 50)
+```
+
+```{r}
+summary(ames$Sale_Price)
+```
+
+Dado que la distribucion esta significativamente *skewed* vamos a utilizar una transformacion logaritmica en la salida. Para esto creemos una nueva variable con dicha transformacion
+
+```{r}
+ames_v2 <- ames %>% 
+  mutate(Sale_Price_log10 = log10(Sale_Price))
+```
+
+Y ahora grafiquemos el Histograma
+
+```{r}
+hist(ames_v2$Sale_Price_log10, breaks = 50)
+```
+
+### Grafiquemos en un Mapa usando Latitud y Longitud
+
+Primero seleccionemos un subconjunto de los barrios. Para esto miremos que barrios hay
+```{r}
+levels(ames_v2$Neighborhood)
+```
+Ahora creemos el subconjunto
+
+```{r}
+ames_v2_subset <- ames_v2 %>%
+  filter(Neighborhood %in% c("North_Ames", "Old_Town", "Somerset"))
+
+```
+
+Ahora si graficamos el mapa
+```{r}
+mapview(ames_v2_subset, 
+        xcol = "Longitude", 
+        ycol = "Latitude", 
+        zcol = "Neighborhood",
+        legend = FALSE,
+        crs = 4269, 
+        grid = FALSE,
+        color = heat.colors(n = 3, alpha = 1),
+        cex = 2.0,
+        burst = TRUE)
+```
+
+Aqui una guia de cada parametro
+
+- xcol: variable que se usa para el eje x.
+- ycol: variable que se usa para el eje y.
+- zcol: variable categorica que se usa para diferenciar los puntos en el mapa
+- legend: opcion binaria (TRUE/FALSE) para mostrar o no una leyenda
+- crs: [Coordinate Reference System](https://www.nceas.ucsb.edu/sites/default/files/2020-04/OverviewCoordinateReferenceSystems.pdf)
+- grid: opcion binaria (TRUE/FALSE) para mostrar la grilla en el dibujo
+- color: paleta de colores para graficar los puntos. En este caso se usa una funcion base de R que contiene una paleta de colores que hace parte del paquete [grDevices](http://uribo.github.io/rpkg_showcase/graphics/grDevices.html). Aqui una [guia](https://www.nceas.ucsb.edu/sites/default/files/2020-04/colorPaletteCheatsheet.pdf) para el uso de paletas de colores en R.
+- cex: controla el tamano de los puntos.
+- burst: muestra todas las capas
+
+## Como utilizar los datos para ajustar el modelo
+
+Usualmente es necesario dividir la informacion disponible en al menos dos conjuntos: entranamiento y prueba. Con el primer conjunto tenemos la oportunidad de ajustar los parametros del modelo. Con el segundo conjunto tenemos la posibilidad de estimar que tan bueno es el modelo cuando lo usemos en la practica.
+
+### Particion Aleatoria
+
+Afortundamente tidymodels tiene una funcion que nos facilita esto. Si no hay ninguna consideracion respecto a tiempo usualmente se hace una particion aleatoria de los datos disponibles. Dado que la particion es aleatoria usualmente hacemos algo que se llama *fijar la semilla* del generador de numeros aleatorios de R. Esto lo hacemos a traves de la funcion `set.seed()`. Esto nos permite reproducir los resultados nuevamente dadoq eu se escogeran las mismas muestras para entrenamiento y prueba. Tradicionalmente se usa el 80% para entrenamiento y el 20% para prueba. 
+
+```{r}
+set.seed(123)
+ames_split <- initial_split(ames_v2, prop = 0.80)
+ames_split
+```
+`ames_split` solo contiene informacion respecto a la particion. Si queremos tener realmente la particion de los datos necesitamos hacer lo siguiente
+
+
+```{r}
+ames_train <- training(ames_split)
+ames_test  <- testing(ames_split)
+dim(ames_train)
+```
+### Particion Estratificada
+
+No obstante, muchas veces es mejor usar una particion estratificada. Esta consiste en dividir a la variable continua en quartiles y garantizar que la proporcion de muestras en cada cuartil sea la misma para el conjunto de datos de entrenamiento y de prueba.
+
+Primero calculemos los cuartiles 
+
+```{r}
+sales_quantiles <- quantile(ames_v2$Sale_Price_log10)
+
+sales_quantiles
+```
+Ahora hagamos una grafica de densidad en vez de un histograma y visualizemos los cuartiles con lineas
+
+```{r}
+plot(density(ames_v2$Sale_Price_log10))
+abline(v=sales_quantiles[1])
+abline(v=sales_quantiles[2])
+abline(v=sales_quantiles[3])
+abline(v=sales_quantiles[4])
+```
+
+```{r}
+set.seed(123)
+ames_split <- initial_split(ames_v2, prop = 0.80, strata = Sale_Price_log10)
+ames_train <- training(ames_split)
+ames_test  <- testing(ames_split)
+```
+
+### Particion usando tiempo
+
+En algunas ocasiones el tiempo hay que considerarlo debido a la naturaleza de como se genera la informacion. Miermos la distribucion de cuando se vendieron las casas
+
+```{r}
+table(ames_v2$Year_Sold)
+```
+Ahora ordemos por Year. Esto es importante para que la funcion opere apropiadamente
+
+```{r}
+ames_v3 <- ames_v2 %>%
+  arrange(Year_Sold, Mo_Sold)
+  
+```
+```{r}
+ames_v3 %>% 
+  select(Year_Sold, Mo_Sold) %>%
+    head(20)
+```
+
+
+```{r}
+set.seed(123)
+ames_split <- initial_time_split(ames_v3, lag=2)
+ames_train <- training(ames_split)
+ames_test  <- testing(ames_split)
+```
+
+Verifiquemos el Year min y max para cada set
+
+
+```{r}
+c(min(ames_train$Year_Sold), max(ames_train$Year_Sold))
+```
+```{r}
+c(min(ames_test$Year_Sold), max(ames_test$Year_Sold))
+```
+
+## Como crear un modelo
+
+
