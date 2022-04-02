@@ -1,13 +1,22 @@
 ---
 title: 'Modelos Lineales en R'
 output:
+<<<<<<< HEAD
   pdf_document: default
   html_document: default
+=======
+  html_document: default
+  pdf_document: default
+>>>>>>> 586680f89dd8775c1dbdfb8d45a4b6d7076bcf3a
 ---
 
 # Datos de Casas en Ames, Iowa US
 
+<<<<<<< HEAD
 Estos datos contienen 2930 casas en la ciudad de Ames en Iowa en Estados Unidos. Los datos originales han sido modificados para facilitar uso y hacen parte del paquete [modeldata](https://modeldata.tidymodels.org/). *modeldata* hace parte de tidyverse
+=======
+Estos datos contienen 2930 casas en la ciudad de Iowa en Estados Unidos. Los datos originales han sido modificados para facilitar uso y hacen parte del paquete [modeldata](https://modeldata.tidymodels.org/). *modeldata* hace parte de tidyverse
+>>>>>>> 586680f89dd8775c1dbdfb8d45a4b6d7076bcf3a
 
 Usaremos tambien un nuevo paquete [mapview](https://r-spatial.github.io/mapview/index.html). Este paquete nos servira para visualizar datos Geospaciales muy facilmente.
 
@@ -20,6 +29,10 @@ sudo apt-get update
 sudo apt-get install libgdal-dev libgeos-dev libproj-dev
 ```
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 586680f89dd8775c1dbdfb8d45a4b6d7076bcf3a
 **Importemos las librerias necesarias**
 
 ```{r}
@@ -33,6 +46,10 @@ library(mapview)
 tidymodels_prefer(quiet=FALSE)
 ```
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 586680f89dd8775c1dbdfb8d45a4b6d7076bcf3a
 **Carguemos los datos**
 
 ```{r}
@@ -52,6 +69,7 @@ Revisemos la lista de variables
 names(ames)
 ```
 
+<<<<<<< HEAD
 ```{r}
 class(ames$Bsmt_Full_Bath)
 ```
@@ -63,6 +81,8 @@ Esto muestra la importancia de un diccionario de datos.
 
 - Bsmt_Full_Bath: El sotano tiene un banno completo. Tipo: numerica. min = 0. max  = 3.
 - Firepalces: Chimeneas Tipo Integer min 0 max 4
+=======
+>>>>>>> 586680f89dd8775c1dbdfb8d45a4b6d7076bcf3a
 
 ## Pregunta Problema
 
@@ -93,6 +113,7 @@ Y ahora grafiquemos el Histograma
 ```{r}
 hist(ames_v2$Sale_Price_log10, breaks = 50)
 ```
+<<<<<<< HEAD
 ```{r}
 summary(ames_v2$Sale_Price_log10)
 ```
@@ -113,6 +134,12 @@ Podemos copiar y pegar la latitud y la longitud de una de las casas en Google Ma
 
 Primero seleccionemos un subconjunto de los barrios. Para esto miremos que barrios hay
 
+=======
+
+### Grafiquemos en un Mapa usando Latitud y Longitud
+
+Primero seleccionemos un subconjunto de los barrios. Para esto miremos que barrios hay
+>>>>>>> 586680f89dd8775c1dbdfb8d45a4b6d7076bcf3a
 ```{r}
 levels(ames_v2$Neighborhood)
 ```
@@ -135,7 +162,11 @@ mapview(ames_v2_subset,
         grid = FALSE,
         color = heat.colors(n = 3, alpha = 1),
         cex = 2.0,
+<<<<<<< HEAD
         burst = TRUE)@map
+=======
+        burst = TRUE)
+>>>>>>> 586680f89dd8775c1dbdfb8d45a4b6d7076bcf3a
 ```
 
 Aqui una guia de cada parametro
@@ -152,11 +183,19 @@ Aqui una guia de cada parametro
 
 ## Como utilizar los datos para ajustar el modelo
 
+<<<<<<< HEAD
 Usualmente es necesario dividir la informacion disponible en al menos dos conjuntos: *entrenamiento y prueba*. Con el primer conjunto tenemos la oportunidad de ajustar los parametros del modelo. Con el segundo conjunto tenemos la posibilidad de estimar que tan bueno es el modelo cuando lo usemos en la practica.
 
 ### Particion Aleatoria
 
 Afortundamente tidymodels tiene una funcion que nos facilita esto. Si no hay ninguna consideracion respecto a tiempo usualmente se hace una particion aleatoria de los datos disponibles. Dado que la particion es aleatoria usualmente hacemos algo que se llama *fijar la semilla* del generador de numeros aleatorios de R. Esto lo hacemos a traves de la funcion `set.seed()`. Esto nos permite reproducir los resultados nuevamente dado que se escogeran las mismas muestras para entrenamiento y prueba. Tradicionalmente se usa el 80% para entrenamiento y el 20% para prueba. la funcion que usaremos hace parte del paquete [rsample](https://rsample.tidymodels.org/reference/index.html)
+=======
+Usualmente es necesario dividir la informacion disponible en al menos dos conjuntos: entranamiento y prueba. Con el primer conjunto tenemos la oportunidad de ajustar los parametros del modelo. Con el segundo conjunto tenemos la posibilidad de estimar que tan bueno es el modelo cuando lo usemos en la practica.
+
+### Particion Aleatoria
+
+Afortundamente tidymodels tiene una funcion que nos facilita esto. Si no hay ninguna consideracion respecto a tiempo usualmente se hace una particion aleatoria de los datos disponibles. Dado que la particion es aleatoria usualmente hacemos algo que se llama *fijar la semilla* del generador de numeros aleatorios de R. Esto lo hacemos a traves de la funcion `set.seed()`. Esto nos permite reproducir los resultados nuevamente dadoq eu se escogeran las mismas muestras para entrenamiento y prueba. Tradicionalmente se usa el 80% para entrenamiento y el 20% para prueba. 
+>>>>>>> 586680f89dd8775c1dbdfb8d45a4b6d7076bcf3a
 
 ```{r}
 set.seed(123)
@@ -165,15 +204,19 @@ ames_split
 ```
 `ames_split` solo contiene informacion respecto a la particion. Si queremos tener realmente la particion de los datos necesitamos hacer lo siguiente
 
+<<<<<<< HEAD
 ```{r}
 2344/2930
 ```
+=======
+>>>>>>> 586680f89dd8775c1dbdfb8d45a4b6d7076bcf3a
 
 ```{r}
 ames_train <- training(ames_split)
 ames_test  <- testing(ames_split)
 dim(ames_train)
 ```
+<<<<<<< HEAD
 
 ```{r}
 dim(ames_test)
@@ -181,6 +224,8 @@ dim(ames_test)
 ```{r}
 586/2930
 ```
+=======
+>>>>>>> 586680f89dd8775c1dbdfb8d45a4b6d7076bcf3a
 ### Particion Estratificada
 
 No obstante, muchas veces es mejor usar una particion estratificada. Esta consiste en dividir a la variable continua en quartiles y garantizar que la proporcion de muestras en cada cuartil sea la misma para el conjunto de datos de entrenamiento y de prueba.
@@ -209,6 +254,7 @@ ames_train <- training(ames_split)
 ames_test  <- testing(ames_split)
 ```
 
+<<<<<<< HEAD
 Verifiquemos los cuartiles de cada uno de los conjuntos
 
 ```{r}
@@ -223,6 +269,11 @@ quantile(ames_test$Sale_Price_log10)
 ### Particion usando tiempo
 
 En algunas ocasiones el tiempo hay que considerarlo debido a la naturaleza de como se genera la informacion. Miremos la distribucion de cuando se vendieron las casas
+=======
+### Particion usando tiempo
+
+En algunas ocasiones el tiempo hay que considerarlo debido a la naturaleza de como se genera la informacion. Miermos la distribucion de cuando se vendieron las casas
+>>>>>>> 586680f89dd8775c1dbdfb8d45a4b6d7076bcf3a
 
 ```{r}
 table(ames_v2$Year_Sold)
@@ -232,7 +283,13 @@ Ahora ordemos por Year. Esto es importante para que la funcion opere apropiadame
 ```{r}
 ames_v3 <- ames_v2 %>%
   arrange(Year_Sold, Mo_Sold)
+<<<<<<< HEAD
 
+=======
+  
+```
+```{r}
+>>>>>>> 586680f89dd8775c1dbdfb8d45a4b6d7076bcf3a
 ames_v3 %>% 
   select(Year_Sold, Mo_Sold) %>%
     head(20)
@@ -252,7 +309,10 @@ Verifiquemos el Year min y max para cada set
 ```{r}
 c(min(ames_train$Year_Sold), max(ames_train$Year_Sold))
 ```
+<<<<<<< HEAD
 
+=======
+>>>>>>> 586680f89dd8775c1dbdfb8d45a4b6d7076bcf3a
 ```{r}
 c(min(ames_test$Year_Sold), max(ames_test$Year_Sold))
 ```
