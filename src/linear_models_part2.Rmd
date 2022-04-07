@@ -1,0 +1,89 @@
+---
+title: 'Modelos Lineales en R: Parte 2'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Datos de Casas en Ames, Iowa US
+
+Estos datos contienen 2930 casas en la ciudad de Ames en Iowa en Estados Unidos. Los datos originales han sido modificados para facilitar uso y hacen parte del paquete [modeldata](https://modeldata.tidymodels.org/). *modeldata* hace parte de tidyverse
+
+
+**Importemos las librerias necesarias**
+
+```{r}
+library(tidymodels)
+```
+
+**Resolvamos los conflictos entre los distintos paquetes**
+
+```{r}
+tidymodels_prefer(quiet=FALSE)
+```
+
+## Carguemos los datos**
+
+```{r}
+data(ames)
+
+head(ames)
+```
+Revisemos las dimensiones del dataframe
+
+```{r}
+dim(ames)
+```
+
+Revisemos la lista de variables
+
+```{r}
+names(ames)
+```
+
+## Procesemos los datos
+
+```{r}
+ames <- ames %>% 
+  mutate(Sale_Price_log10 = log10(Sale_Price))
+```
+
+## Particion Estratificada
+
+
+```{r}
+set.seed(123)
+ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price_log10)
+ames_train <- training(ames_split)
+ames_test  <- testing(ames_split)
+```
+
+Verifiquemos los cuartiles de cada uno de los conjuntos
+
+```{r}
+quantile(ames_train$Sale_Price_log10)
+```
+
+
+```{r}
+quantile(ames_test$Sale_Price_log10)
+```
+
+# Creemos el modelo
+
+## Especifiquemos el *engine* con [set_engine](https://parsnip.tidymodels.org/reference/set_engine.html)
+
+Primero miremos cuales *engines* hay par modelos lineales
+
+```{r}
+show_engines("linear_reg")
+```
+```{r}
+linear_reg() %>% set_engine("lm")
+```
+
+
+## Ajustemos el modelo
+
+
+
