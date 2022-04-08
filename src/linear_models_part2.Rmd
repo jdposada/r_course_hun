@@ -9,6 +9,7 @@ output:
 
 Estos datos contienen 2930 casas en la ciudad de Ames en Iowa en Estados Unidos. Los datos originales han sido modificados para facilitar uso y hacen parte del paquete [modeldata](https://modeldata.tidymodels.org/). *modeldata* hace parte de tidyverse
 
+El paquete que usaremos para ajustar modelos el dia de hoy se llama [parnisp](https://parsnip.tidymodels.org/)
 
 **Importemos las librerias necesarias**
 
@@ -71,6 +72,78 @@ quantile(ames_test$Sale_Price_log10)
 
 # Creemos el modelo
 
+## Especifiquemos el *engine* con [set_engine](https://---
+title: 'Modelos Lineales en R: Parte 2'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Datos de Casas en Ames, Iowa US
+
+Estos datos contienen 2930 casas en la ciudad de Ames en Iowa en Estados Unidos. Los datos originales han sido modificados para facilitar uso y hacen parte del paquete [modeldata](https://modeldata.tidymodels.org/). *modeldata* hace parte de tidyverse
+
+
+**Importemos las librerias necesarias**
+
+```{r}
+library(tidymodels)
+```
+
+**Resolvamos los conflictos entre los distintos paquetes**
+
+```{r}
+tidymodels_prefer(quiet=FALSE)
+```
+
+## Carguemos los datos**
+
+```{r}
+data(ames)
+head(ames)
+```
+Revisemos las dimensiones del dataframe
+
+```{r}
+dim(ames)
+```
+
+Revisemos la lista de variables
+
+```{r}
+names(ames)
+```
+
+## Procesemos los datos
+
+```{r}
+ames <- ames %>% 
+  mutate(Sale_Price_log10 = log10(Sale_Price))
+```
+
+## Particion Estratificada
+
+
+```{r}
+set.seed(123)
+ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price_log10)
+ames_train <- training(ames_split)
+ames_test  <- testing(ames_split)
+```
+
+Verifiquemos los cuartiles de cada uno de los conjuntos
+
+```{r}
+quantile(ames_train$Sale_Price_log10)
+```
+
+
+```{r}
+quantile(ames_test$Sale_Price_log10)
+```
+
+# Creemos el modelo
+
 ## Especifiquemos el *engine* con [set_engine](https://parsnip.tidymodels.org/reference/set_engine.html)
 
 Primero miremos cuales *engines* hay par modelos lineales
@@ -78,12 +151,111 @@ Primero miremos cuales *engines* hay par modelos lineales
 ```{r}
 show_engines("linear_reg")
 ```
+## Ajustemos el modelo/reference/set_engine.html)
+
+### [linear_reg](https://parsnip.tidymodels.org/reference/linear_reg.html)
+
+
 ```{r}
-linear_reg() %>% set_engine("lm")
+lm_model <- linear_reg() %>% 
+  set_engine("lm")
+```
+## Ajustemos el modelo
+
+### [fit](https://parsnip.tidymodels.org/reference/fit.html)
+
+```{r}
+lm_form_fit <- lm_model %>%
+  fit(Sale_Price_log10 ~ Longitude + Latitude, data = ames_train)
+```
+
+```{r}
+lm_form_fit
+```
+```{r}
+lm_xy_fit <- lm_model %>%
+  fit_xy(x = ames_train %>% select(Longitude, Latitude),
+         y = ames_train %>% pull(Sale_Price_log10)
+         )
 ```
 
 
-## Ajustemos el modelo
+```{r}
+lm_xy_fit
+```
+### Ejercicio: Escoger dos variables diferentes
 
+1. Entrenar el modelo
+2. Comparar los coeficientes
 
+```{r}
+lm_form_fit <- lm_model %>%
+  fit(Sale_Price_log10 ~ Year_Built + Year_Sold, data = ames_train)
+lm_form_fit
+```
+## Acceder a la informacion del modelo que entrenamos [extract_fit_engine](https://parsnip.tidymodels.org/reference/extract-parsnip.html)
+
+```{r}
+model_res <- lm_form_fit %>%
+  extract_fit_engine() %>%
+  summary()
+
+model_res
+```
+Comparemos ahora los resultados del modelo usando como predictores latitud y longitud
+```{r}
+lm_form_fit <- lm_model %>%
+  fit(Sale_Price_log10 ~ Longitude + Latitude, data = ames_train)
+
+model_res <- lm_form_fit %>%
+  extract_fit_engine() %>%
+  summary()
+
+model_res
+```
+### [predict](https://parsnip.tidymodels.org/reference/predict.model_fit.html)
+
+```{r}
+ames_test_small <- ames_test %>% 
+  slice(1:5)
+
+ames_test_small
+```
+```{r}
+sales_price_small <- predict(lm_form_fit, new_data = ames_test_small)
+
+sales_price_small
+```
+Como podemos comparar las predicciones con los datos reales
+
+```{r}
+ames_test_small %>%
+  select(Sale_Price_log10) %>%
+  bind_cols(predict(lm_form_fit, ames_test_small))
+```
+## Intro a ggplot
+
+```{r}
+ames_test_pred <- ames_test %>%
+  select(Sale_Price_log10) %>%
+  bind_cols(predict(lm_form_fit, ames_test))
+head(ames_test_pred)
+```
+
+```{r}
+ggplot(ames_test_pred, aes(x= Sale_Price_log10, y=.pred)) + 
+  geom_abline(lty=2) + 
+  geom_point(alpha = 0.5) +
+  labs(y = "Prediccion del modelo (log10)", x = "Precios Reales(log10)") + 
+  coord_obs_pred()
+```
+## Estimacion del rendimiento del modelo
+
+```{r}
+ames_metrics <-  metric_set(rmse, mae)
+
+ames_metrics(ames_test_pred, 
+             truth = Sale_Price_log10,
+             estimate = .pred)
+```
 
