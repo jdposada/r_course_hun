@@ -31,9 +31,9 @@ ui <- fluidPage(
     
   )
   
-
   
-
+  
+  
   
 )
 
@@ -45,12 +45,12 @@ server <- function(input, output) {
   
   # las variables que vienen desde el UI vienen en la variable input
   output$grafica1 <- renderPlot({
-                                  x    <- gapminder$gdpPercap
-                                  hist(x, 
-                                       breaks=input$particiones,
-                                       col = 'darkgray',
-                                       border = 'white')
-                                })
+    x    <- gapminder$gdpPercap
+    hist(x, 
+         breaks=input$particiones,
+         col = 'darkgray',
+         border = 'white')
+  })
   
   # guardamos el render del dataframe en la variable que se esta esperando que es
   # tabla1
