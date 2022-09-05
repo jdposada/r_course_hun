@@ -1,0 +1,44 @@
+```{r}
+install.packages("RPostgres")
+```
+
+```{r}
+fileString <- "
+dbname,
+host,
+port,
+user,
+password
+"
+```
+
+```{r}
+myData <- readr::read_lines("psql_credential.txt")
+rowNames <- c()
+values <- c()
+for (i in 1:length(myData)) {
+ columna <- strsplit(myData[i], ",")[[1]][1]
+ valor <- strsplit(myData[i], ",")[[1]][2]
+ rowNames[i] <- columna
+ values[i] <- valor
+} 
+credentials <- data.frame(row.names=rowNames , val=values)
+```
+
+
+```{r}
+library(DBI)
+con <- dbConnect(RPostgres::Postgres(),
+                 dbname = credentials['dbname',], 
+                 host = credentials['host',],
+                 port = as.integer(credentials['port',]),
+                 user = credentials['user',],
+                 password = credentials['password',])
+dbListTables(con)
+```
+
+
+```{r}
+dfPerson <- dbGetQuery(con, "SELECT person_id, year_of_birth FROM \"DATOSBI\".PERSON LIMIT 10" )
+rmarkdown::paged_table(dfPerson)
+```

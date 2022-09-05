@@ -43,3 +43,4 @@ run_docker.sh
 .cache
 .config
 .local
+src/db_tutorials/psql_credential.txt
