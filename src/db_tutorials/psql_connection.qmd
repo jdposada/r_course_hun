@@ -1,19 +1,43 @@
+---
+title: "PSQL connection Test"
+format: pdf
+---
+
 ```{r}
 install.packages("RPostgres")
 ```
 
+Load Libraries
+
 ```{r}
-fileString <- "
-dbname,
+library(DBI)
+library(dplyr)
+library(dbplyr)
+setwd("/home/rstudio/r_course_hun/src/db_tutorials")
+credentials_filename <- "psql_credential.txt"
+```
+
+This needs to be run just one to create the file. After the file is create you need to paste the values
+
+```{r}
+if(isFALSE(file.exists(credentials_filename))){
+file_lines <- "dbname,
 host,
 port,
 user,
-password
-"
+password,"
+    
+fileConn <- file(credentials_filename)
+writeLines(file_lines, fileConn)
+close(fileConn)
+}
+
 ```
 
+This reads the file
+
 ```{r}
-myData <- readr::read_lines("psql_credential.txt")
+myData <- readr::read_lines(credentials_filename)
 rowNames <- c()
 values <- c()
 for (i in 1:length(myData)) {
@@ -25,20 +49,27 @@ for (i in 1:length(myData)) {
 credentials <- data.frame(row.names=rowNames , val=values)
 ```
 
+This test the connection
 
 ```{r}
-library(DBI)
 con <- dbConnect(RPostgres::Postgres(),
                  dbname = credentials['dbname',], 
                  host = credentials['host',],
                  port = as.integer(credentials['port',]),
                  user = credentials['user',],
                  password = credentials['password',])
+
 dbListTables(con)
 ```
 
+```{r}
+dfPerson <- dbGetQuery(con, "SELECT * FROM mimiciii.patients LIMIT 10" )
+```
 
 ```{r}
-dfPerson <- dbGetQuery(con, "SELECT person_id, year_of_birth FROM \"DATOSBI\".PERSON LIMIT 10" )
-rmarkdown::paged_table(dfPerson)
+patients <- tbl(con, in_schema("mimiciii", "patients"))
+```
+
+```{r}
+patients %>% head()
 ```
