@@ -1,6 +1,6 @@
-# Introduccion a R para el Analisis de Datos
+# Introduccion a R para el Analisis de Datos Clínicos
 
-En este curso cubrimos los aspectos basicos de R para el analisis de datos.
+En este curso cubrimos los aspectos basicos de R para el analisis de datos clínicos usando la base de datos de MIMIC
 
 ## Cronograma
 
