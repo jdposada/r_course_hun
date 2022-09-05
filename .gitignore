@@ -40,3 +40,6 @@ vignettes/*.pdf
 
 
 run_docker.sh
+.cache
+.config
+.local
